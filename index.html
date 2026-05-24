@@ -3,89 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Раскрой композитной ткани</title>
+<title>Carbonit</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#111;color:#e0e0e0;padding:16px;padding-bottom:calc(80px + env(safe-area-inset-bottom));max-width:700px;margin:0 auto}
-h1{font-size:18px;font-weight:500;margin-bottom:20px;color:#fff}
-.label{font-size:13px;color:#888;margin-bottom:6px}
-.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.tab{padding:8px 16px;border-radius:8px;border:1px solid #333;font-size:13px;cursor:pointer;background:transparent;color:#888;-webkit-tap-highlight-color:transparent}
-.tab.active{background:#1e1e1e;color:#fff;border-color:#555}
-.inputs{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
-input[type=number]{width:100%;padding:10px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:16px;outline:none;-webkit-appearance:none}
-.sub{font-size:12px;color:#555;margin-top:-6px;width:100%}
-button.add{width:100%;padding:11px;margin-top:4px;background:#172217;border:1px solid #2a4a2a;border-radius:8px;color:#7fc87f;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-button.add:active{background:#1e2e1e}
-button.go{width:100%;padding:13px;margin-top:12px;background:#1e1e1e;border:1px solid #444;border-radius:8px;color:#fff;font-size:15px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-button.go:active:not(:disabled){background:#252525}
-button.go:disabled{opacity:.35;cursor:not-allowed}
-#parts-list{margin:14px 0 4px;display:flex;flex-direction:column;gap:6px;min-height:0}
-.part-item{display:flex;align-items:center;gap:10px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:9px 12px}
-.part-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.part-label{flex:1;font-size:13px;color:#ccc}
-.part-del{background:none;border:none;color:#444;cursor:pointer;font-size:22px;line-height:1;padding:0 6px;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:system-ui,sans-serif;
+  background-color:#0f0f0f;
+  background-image:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 8px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 8px);
+  background-size:16px 16px;
+  color:#e0e0e0;
+  padding:14px 14px calc(80px + env(safe-area-inset-bottom));
+  max-width:700px;margin:0 auto
+}
+header{display:flex;align-items:center;gap:13px;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid #1e1e1e}
+.logo{
+  width:36px;height:36px;flex-shrink:0;background:#e8622a;
+  clip-path:polygon(0 0,78% 0,100% 22%,100% 100%,0 100%);
+  display:flex;align-items:center;justify-content:center
+}
+.logo-c{font-family:'Courier New',monospace;font-size:22px;font-weight:900;color:#000;line-height:1;margin-left:-2px}
+.h-title{font-size:20px;font-weight:700;letter-spacing:.12em;color:#fff;font-family:'Courier New',monospace;text-transform:uppercase}
+.h-sub{font-size:9px;letter-spacing:.1em;color:#444;font-family:'Courier New',monospace;margin-top:3px;text-transform:uppercase}
+.label{font-size:10px;color:#555;letter-spacing:.14em;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:6px}
+.tabs{display:flex;gap:3px;margin-bottom:16px;flex-wrap:wrap}
+.tab{
+  padding:8px 13px;border-radius:2px;border:1px solid #222;
+  font-size:11px;font-family:'Courier New',monospace;letter-spacing:.06em;text-transform:uppercase;
+  cursor:pointer;background:#0d0d0d;color:#444;-webkit-tap-highlight-color:transparent
+}
+.tab.active{background:#161616;color:#e8622a;border-color:#e8622a;border-left-width:3px}
+.inputs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:90px}
+input[type=number]{
+  width:100%;padding:10px;background:#131313;
+  border:1px solid #252525;border-bottom:2px solid #2e2e2e;
+  border-radius:2px;color:#fff;font-size:18px;
+  font-family:'Courier New',monospace;outline:none;-webkit-appearance:none
+}
+input[type=number]:focus{border-bottom-color:#e8622a;background:#161616}
+#rollw{color:#e8622a;font-size:22px}
+.sub{font-size:10px;color:#353535;margin-top:-4px;width:100%;font-family:'Courier New',monospace;line-height:1.4}
+button.add{
+  width:100%;padding:11px;margin-top:6px;background:transparent;
+  border:1px solid #e8622a;border-radius:2px;color:#e8622a;
+  font-size:11px;font-family:'Courier New',monospace;letter-spacing:.14em;text-transform:uppercase;
+  cursor:pointer;-webkit-tap-highlight-color:transparent
+}
+button.add:active{background:rgba(232,98,42,.1)}
+#parts-list{margin:12px 0 4px;display:flex;flex-direction:column;gap:4px}
+.part-item{
+  display:flex;align-items:center;gap:10px;
+  background:#111;border:1px solid #1e1e1e;border-left:3px solid #555;
+  border-radius:2px;padding:9px 12px
+}
+.part-label{flex:1;font-size:11px;font-family:'Courier New',monospace;color:#999;letter-spacing:.04em}
+.part-del{background:none;border:none;color:#2a2a2a;cursor:pointer;font-size:20px;line-height:1;padding:0 4px;-webkit-tap-highlight-color:transparent}
 .part-del:active{color:#c44}
-.empty-hint{font-size:13px;color:#444;text-align:center;padding:12px 0}
-.sep{height:1px;background:#222;margin:16px 0}
-#cvwrap{border:1px solid #222;border-radius:8px;overflow:auto;background:#1a1a1a;padding:12px;margin-top:20px;display:none}
+.empty-hint{font-size:10px;font-family:'Courier New',monospace;color:#2a2a2a;text-align:center;padding:14px 0;letter-spacing:.12em;text-transform:uppercase}
+.sep{height:1px;background:#1a1a1a;margin:16px 0}
+button.go{
+  width:100%;padding:14px;margin-top:12px;
+  background:#e8622a;border:none;border-radius:2px;
+  color:#000;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  font-family:'Courier New',monospace;cursor:pointer;-webkit-tap-highlight-color:transparent
+}
+button.go:active{background:#c9521f}
+button.go:disabled{background:#181818;color:#2a2a2a;cursor:not-allowed}
+#cvwrap{border:1px solid #1e1e1e;border-radius:2px;overflow:auto;background:#0d0d0d;padding:10px;margin-top:20px;display:none}
 svg{display:block}
-.stats{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.stat{background:#1a1a1a;border-radius:8px;padding:12px;flex:1;min-width:90px}
-.sl{font-size:12px;color:#666;margin-bottom:4px}
-.sv{font-size:20px;font-weight:500;color:#fff}
-.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
-.leg-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#999}
-.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.stats{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.stat{background:#111;border:1px solid #1e1e1e;border-top:2px solid #2a2a2a;border-radius:2px;padding:12px;flex:1;min-width:80px}
+.sl{font-size:9px;font-family:'Courier New',monospace;color:#444;letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px}
+.sv{font-size:22px;font-weight:700;color:#fff;font-family:'Courier New',monospace}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;font-family:'Courier New',monospace;color:#555;letter-spacing:.05em}
+.leg-dot{width:7px;height:7px;border-radius:1px;flex-shrink:0}
 </style>
 </head>
 <body>
-<h1>Раскрой композитной ткани</h1>
 
-<div class="field" style="max-width:200px;margin-bottom:18px">
-  <div class="label">Ширина рулона (см)</div>
+<header>
+  <div class="logo"><span class="logo-c">C</span></div>
+  <div>
+    <div class="h-title">Carbonit</div>
+    <div class="h-sub">Раскрой композитной ткани</div>
+  </div>
+</header>
+
+<div class="field" style="max-width:160px;margin-bottom:20px">
+  <div class="label">Ширина рулона / см</div>
   <input type="number" id="rollw" value="140" min="10" step="1">
 </div>
 
 <div class="label">Тип детали</div>
 <div class="tabs">
   <button class="tab active" onclick="setS('rect')">Прямоугольник</button>
-  <button class="tab" onclick="setS('rtri')">Прямоугольный ▷</button>
-  <button class="tab" onclick="setS('itri')">Равнобедренный △</button>
+  <button class="tab" onclick="setS('rtri')">Прям. ▷</button>
+  <button class="tab" onclick="setS('itri')">Равнобедр. △</button>
   <button class="tab" onclick="setS('trap')">Трапеция</button>
 </div>
 
 <div id="in-rect" class="inputs">
-  <div class="field"><div class="label">Ширина (см)</div><input type="number" id="rw" value="13" min="1" step="0.5"></div>
-  <div class="field"><div class="label">Высота (см)</div><input type="number" id="rh" value="24" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Ширина / см</div><input type="number" id="rw" value="13" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота / см</div><input type="number" id="rh" value="24" min="1" step="0.5"></div>
   <div class="field"><div class="label">Штук</div><input type="number" id="rn" value="10" min="1"></div>
 </div>
 <div id="in-rtri" class="inputs" style="display:none">
-  <div class="field"><div class="label">Ширина прямоуг. (см)</div><input type="number" id="rtw" value="20" min="1" step="0.5"></div>
-  <div class="field"><div class="label">Высота прямоуг. (см)</div><input type="number" id="rth" value="30" min="1" step="0.5"></div>
-  <div class="field"><div class="label">Штук треугольников</div><input type="number" id="rtn" value="7" min="1"></div>
-  <div class="sub">Прямоугольник режется по диагонали → 2 треугольника, обрезков нет.</div>
+  <div class="field"><div class="label">Ширина прямоуг.</div><input type="number" id="rtw" value="20" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота прямоуг.</div><input type="number" id="rth" value="30" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Штук △</div><input type="number" id="rtn" value="7" min="1"></div>
+  <div class="sub">Диагональ → 2 треугольника без обрезков</div>
 </div>
 <div id="in-itri" class="inputs" style="display:none">
-  <div class="field"><div class="label">Основание (см)</div><input type="number" id="itb" value="20" min="1" step="0.5"></div>
-  <div class="field"><div class="label">Высота (см)</div><input type="number" id="ith" value="30" min="1" step="0.5"></div>
-  <div class="field"><div class="label">Штук треугольников</div><input type="number" id="itn" value="8" min="1"></div>
-  <div class="sub">Зигзаг △▽△▽ — обрезки только по краям рулона.</div>
+  <div class="field"><div class="label">Основание / см</div><input type="number" id="itb" value="20" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота / см</div><input type="number" id="ith" value="30" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Штук △</div><input type="number" id="itn" value="8" min="1"></div>
+  <div class="sub">Зигзаг △▽ — обрезки только по краям</div>
 </div>
 <div id="in-trap" class="inputs" style="display:none">
-  <div class="field"><div class="label">Длинное осн. a (см)</div><input type="number" id="ta" value="30" min="1" step="0.5"></div>
-  <div class="field"><div class="label">Короткое осн. b (см)</div><input type="number" id="tc" value="20" min="1" step="0.5"></div>
-  <div class="field"><div class="label">Высота (см)</div><input type="number" id="tth" value="15" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Осн. a / см</div><input type="number" id="ta" value="30" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Осн. b / см</div><input type="number" id="tc" value="20" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота / см</div><input type="number" id="tth" value="15" min="1" step="0.5"></div>
   <div class="field"><div class="label">Штук</div><input type="number" id="trn" value="5" min="1"></div>
-  <div class="sub">Чередование нормальная/перевёрнутая.</div>
+  <div class="sub">Чередование нормальная / перевёрнутая</div>
 </div>
 
 <button class="add" onclick="addPart()">+ Добавить деталь в список</button>
 
 <div id="parts-list">
-  <div class="empty-hint">Список деталей пуст — добавьте хотя бы одну</div>
+  <div class="empty-hint">// список деталей пуст</div>
 </div>
 
 <div class="sep"></div>
@@ -97,19 +146,14 @@ svg{display:block}
     <div class="stat"><div class="sl">Длина рулона</div><div class="sv" id="slen"></div></div>
     <div class="stat"><div class="sl">Использовано</div><div class="sv" id="suse"></div></div>
     <div class="stat"><div class="sl">Обрезки</div><div class="sv" id="swaste"></div></div>
-    <div class="stat"><div class="sl">Деталей всего</div><div class="sv" id="scnt"></div></div>
+    <div class="stat"><div class="sl">Деталей</div><div class="sv" id="scnt"></div></div>
   </div>
   <div class="legend" id="legend"></div>
 </div>
 
 <script>
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.MainButton.setText('Рассчитать раскрой');
-  tg.MainButton.onClick(calc);
-}
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();tg.MainButton.setText('РАССЧИТАТЬ РАСКРОЙ');tg.MainButton.onClick(calc);}
 
 let S='rect';
 let parts=[];
@@ -122,10 +166,16 @@ function setS(s){
 }
 function g(id){return +document.getElementById(id).value;}
 
-function shapeLabel(type,p){
+function shapeCode(type,p){
+  if(type==='rect') return `RECT  ${p.w}×${p.h}cm  ×${p.n}`;
+  if(type==='rtri') return `RTRI  ${p.w}×${p.h}cm  ×${p.n}`;
+  if(type==='itri') return `ITRI  b=${p.base} h=${p.h}cm  ×${p.n}`;
+  if(type==='trap') return `TRAP  a=${p.a} b=${p.b} h=${p.h}cm  ×${p.n}`;
+}
+function shapeFull(type,p){
   if(type==='rect') return `Прямоугольник ${p.w}×${p.h} см × ${p.n} шт`;
   if(type==='rtri') return `Прям. треугольник ${p.w}×${p.h} см × ${p.n} шт`;
-  if(type==='itri') return `Равнобедр. треугольник ос.${p.base} в.${p.h} см × ${p.n} шт`;
+  if(type==='itri') return `Равнобедр. ос.${p.base} в.${p.h} см × ${p.n} шт`;
   if(type==='trap') return `Трапеция a=${p.a} b=${p.b} в.${p.h} см × ${p.n} шт`;
 }
 
@@ -149,22 +199,18 @@ function addPart(){
   renderList();
 }
 
-function removePart(idx){
-  parts.splice(idx,1);
-  renderList();
-}
+function removePart(idx){parts.splice(idx,1);renderList();}
 
 function renderList(){
   const el=document.getElementById('parts-list');
   el.innerHTML='';
-  if(parts.length===0){
-    el.innerHTML='<div class="empty-hint">Список деталей пуст — добавьте хотя бы одну</div>';
-  }
+  if(parts.length===0){el.innerHTML='<div class="empty-hint">// список деталей пуст</div>';}
   parts.forEach((p,i)=>{
+    const color=COLORS[i%COLORS.length];
     const item=document.createElement('div');
     item.className='part-item';
-    item.innerHTML=`<div class="part-dot" style="background:${COLORS[i%COLORS.length]}"></div>`+
-      `<div class="part-label">${shapeLabel(p.type,p.params)}</div>`+
+    item.style.borderLeftColor=color;
+    item.innerHTML=`<div class="part-label">${shapeCode(p.type,p.params)}</div>`+
       `<button class="part-del" onclick="removePart(${i})">×</button>`;
     el.appendChild(item);
   });
@@ -179,23 +225,23 @@ function calcGroup(type,params,rollW){
   if(type==='rect'){
     const{w,h}=params;
     const cols=Math.floor(rollW/w),rows=Math.ceil(n/cols);
-    height=rows*h; usedArea=w*h*n;
+    height=rows*h;usedArea=w*h*n;
     for(let i=0;i<n;i++){const c=i%cols,r=Math.floor(i/cols);pls.push({t:'rect',x:c*w,y:r*h,w,h});}
   } else if(type==='rtri'){
     const{w,h}=params;
     const pairs=Math.ceil(n/2),cols=Math.floor(rollW/w),rows=Math.ceil(pairs/cols);
-    height=rows*h; usedArea=w*h/2*n;
+    height=rows*h;usedArea=w*h/2*n;
     let placed=0;
     for(let i=0;i<pairs;i++){
       const c=i%cols,r=Math.floor(i/cols);
-      pls.push({t:'rtri',x:c*w,y:r*h,w,h,which:0}); placed++;
-      if(placed<n){pls.push({t:'rtri',x:c*w,y:r*h,w,h,which:1}); placed++;}
+      pls.push({t:'rtri',x:c*w,y:r*h,w,h,which:0});placed++;
+      if(placed<n){pls.push({t:'rtri',x:c*w,y:r*h,w,h,which:1});placed++;}
       pls.push({t:'line',x1:c*w,y1:r*h,x2:(c+1)*w,y2:(r+1)*h});
     }
   } else if(type==='itri'){
     const{base,h}=params;
     const step=base/2,perRow=Math.max(1,Math.floor(rollW/step)-1),rows=Math.ceil(n/perRow);
-    height=rows*h; usedArea=base*h/2*n;
+    height=rows*h;usedArea=base*h/2*n;
     let placed=0;
     for(let r=0;r<rows;r++){
       for(let c=0;c<perRow&&placed<n;c++){pls.push({t:'itri',x:c*step,y:r*h,base,h,up:c%2===0});placed++;}
@@ -203,12 +249,10 @@ function calcGroup(type,params,rollW){
   } else if(type==='trap'){
     const{a,b,h}=params;
     const step=(a+b)/2,perRow=Math.max(1,Math.floor((rollW-a)/step)+1),rows=Math.ceil(n/perRow);
-    height=rows*h; usedArea=(a+b)*h/2*n;
+    height=rows*h;usedArea=(a+b)*h/2*n;
     let placed=0;
     for(let r=0;r<rows;r++){
-      for(let c=0;c<perRow&&placed<n;c++){
-        pls.push({t:'trap',x:c*step,y:r*h,a,b,h,flip:c%2===1}); placed++;
-      }
+      for(let c=0;c<perRow&&placed<n;c++){pls.push({t:'trap',x:c*step,y:r*h,a,b,h,flip:c%2===1});placed++;}
     }
   }
   return{pls,height,usedArea,n};
@@ -226,13 +270,10 @@ function calc(){
       p.color=color;
     });
     allPls.push(...pls);
-    totalH+=height;
-    totalUsed+=usedArea;
-    totalN+=n;
+    totalH+=height;totalUsed+=usedArea;totalN+=n;
     if(idx<parts.length-1){allPls.push({t:'sep',y:totalH});}
   });
   render(allPls,rollW,totalH,totalUsed,totalN);
-  // Прокрутить к результату
   setTimeout(()=>document.getElementById('cvwrap').scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
@@ -244,25 +285,24 @@ function render(pls,rollW,totalH,totalUsed,totalN){
   document.getElementById('swaste').textContent=waste+'%';
   document.getElementById('scnt').textContent=totalN+' шт';
 
-  const maxW=Math.min(window.innerWidth-56,660);
+  const maxW=Math.min(window.innerWidth-44,660);
   const sc=Math.min(maxW/rollW,4);
   const sw=Math.round(rollW*sc),sh=Math.round(totalH*sc);
   const svg=document.getElementById('sv');
   svg.innerHTML='';
   svg.setAttribute('width',sw);svg.setAttribute('height',sh);svg.setAttribute('viewBox',`0 0 ${sw} ${sh}`);
   const bg=document.createElementNS(ns,'rect');
-  bg.setAttribute('width',sw);bg.setAttribute('height',sh);bg.setAttribute('fill','#2a2a2a');
+  bg.setAttribute('width',sw);bg.setAttribute('height',sh);bg.setAttribute('fill','#191919');
   svg.appendChild(bg);
 
   pls.forEach(p=>{
     if(p.t==='sep'){
       const line=document.createElementNS(ns,'line');
-      line.setAttribute('x1',0);line.setAttribute('y1',Math.round(p.y*sc)+0.5);
-      line.setAttribute('x2',sw);line.setAttribute('y2',Math.round(p.y*sc)+0.5);
-      line.setAttribute('stroke','#555');line.setAttribute('stroke-width','1');
-      line.setAttribute('stroke-dasharray','8,5');
-      svg.appendChild(line);
-      return;
+      line.setAttribute('x1',0);line.setAttribute('y1',Math.round(p.y*sc)+.5);
+      line.setAttribute('x2',sw);line.setAttribute('y2',Math.round(p.y*sc)+.5);
+      line.setAttribute('stroke','#e8622a');line.setAttribute('stroke-width','1.5');
+      line.setAttribute('stroke-dasharray','6,4');
+      svg.appendChild(line);return;
     }
     if(p.t==='line'){
       const line=document.createElementNS(ns,'line');
@@ -270,12 +310,10 @@ function render(pls,rollW,totalH,totalUsed,totalN){
       line.setAttribute('x2',p.x2*sc);line.setAttribute('y2',p.y2*sc);
       line.setAttribute('stroke','#fff');line.setAttribute('stroke-width','0.8');
       line.setAttribute('stroke-dasharray','4,3');
-      svg.appendChild(line);
-      return;
+      svg.appendChild(line);return;
     }
     const el=document.createElementNS(ns,'polygon');
-    const s=sc;
-    let pts='';
+    const s=sc;let pts='';
     if(p.t==='rect'){
       pts=`${p.x*s},${p.y*s} ${(p.x+p.w)*s},${p.y*s} ${(p.x+p.w)*s},${(p.y+p.h)*s} ${p.x*s},${(p.y+p.h)*s}`;
     } else if(p.t==='rtri'){
@@ -289,10 +327,8 @@ function render(pls,rollW,totalH,totalUsed,totalN){
       if(!flip){pts=`${x*s},${(y+h)*s} ${(x+a)*s},${(y+h)*s} ${(x+a-off)*s},${y*s} ${(x+off)*s},${y*s}`;}
       else{pts=`${x*s},${y*s} ${(x+a)*s},${y*s} ${(x+a-off)*s},${(y+h)*s} ${(x+off)*s},${(y+h)*s}`;}
     }
-    el.setAttribute('points',pts);
-    el.setAttribute('fill',p.color);
-    el.setAttribute('stroke','#111');
-    el.setAttribute('stroke-width','1');
+    el.setAttribute('points',pts);el.setAttribute('fill',p.color);
+    el.setAttribute('stroke','#0d0d0d');el.setAttribute('stroke-width','1');
     svg.appendChild(el);
   });
 
@@ -301,10 +337,9 @@ function render(pls,rollW,totalH,totalUsed,totalN){
   parts.forEach((p,i)=>{
     const item=document.createElement('div');
     item.className='leg-item';
-    item.innerHTML=`<div class="leg-dot" style="background:${COLORS[i%COLORS.length]}"></div><span>${shapeLabel(p.type,p.params)}</span>`;
+    item.innerHTML=`<div class="leg-dot" style="background:${COLORS[i%COLORS.length]}"></div><span>${shapeFull(p.type,p.params)}</span>`;
     legend.appendChild(item);
   });
-
   document.getElementById('cvwrap').style.display='block';
   document.getElementById('stats').style.display='block';
 }
