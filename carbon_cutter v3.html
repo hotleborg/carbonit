@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Раскрой композитной ткани</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#111;color:#e0e0e0;padding:16px;padding-bottom:calc(80px + env(safe-area-inset-bottom));max-width:700px;margin:0 auto}
+h1{font-size:18px;font-weight:500;margin-bottom:20px;color:#fff}
+.label{font-size:13px;color:#888;margin-bottom:6px}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:8px;border:1px solid #333;font-size:13px;cursor:pointer;background:transparent;color:#888;-webkit-tap-highlight-color:transparent}
+.tab.active{background:#1e1e1e;color:#fff;border-color:#555}
+.inputs{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
+input[type=number]{width:100%;padding:10px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:16px;outline:none;-webkit-appearance:none}
+.sub{font-size:12px;color:#555;margin-top:-6px;width:100%}
+button.add{width:100%;padding:11px;margin-top:4px;background:#172217;border:1px solid #2a4a2a;border-radius:8px;color:#7fc87f;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button.add:active{background:#1e2e1e}
+button.go{width:100%;padding:13px;margin-top:12px;background:#1e1e1e;border:1px solid #444;border-radius:8px;color:#fff;font-size:15px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button.go:active:not(:disabled){background:#252525}
+button.go:disabled{opacity:.35;cursor:not-allowed}
+#parts-list{margin:14px 0 4px;display:flex;flex-direction:column;gap:6px;min-height:0}
+.part-item{display:flex;align-items:center;gap:10px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:9px 12px}
+.part-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.part-label{flex:1;font-size:13px;color:#ccc}
+.part-del{background:none;border:none;color:#444;cursor:pointer;font-size:22px;line-height:1;padding:0 6px;-webkit-tap-highlight-color:transparent}
+.part-del:active{color:#c44}
+.empty-hint{font-size:13px;color:#444;text-align:center;padding:12px 0}
+.sep{height:1px;background:#222;margin:16px 0}
+#cvwrap{border:1px solid #222;border-radius:8px;overflow:auto;background:#1a1a1a;padding:12px;margin-top:20px;display:none}
+svg{display:block}
+.stats{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.stat{background:#1a1a1a;border-radius:8px;padding:12px;flex:1;min-width:90px}
+.sl{font-size:12px;color:#666;margin-bottom:4px}
+.sv{font-size:20px;font-weight:500;color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#999}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+</style>
+</head>
+<body>
+<h1>Раскрой композитной ткани</h1>
+
+<div class="field" style="max-width:200px;margin-bottom:18px">
+  <div class="label">Ширина рулона (см)</div>
+  <input type="number" id="rollw" value="140" min="10" step="1">
+</div>
+
+<div class="label">Тип детали</div>
+<div class="tabs">
+  <button class="tab active" onclick="setS('rect')">Прямоугольник</button>
+  <button class="tab" onclick="setS('rtri')">Прямоугольный ▷</button>
+  <button class="tab" onclick="setS('itri')">Равнобедренный △</button>
+  <button class="tab" onclick="setS('trap')">Трапеция</button>
+</div>
+
+<div id="in-rect" class="inputs">
+  <div class="field"><div class="label">Ширина (см)</div><input type="number" id="rw" value="13" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота (см)</div><input type="number" id="rh" value="24" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Штук</div><input type="number" id="rn" value="10" min="1"></div>
+</div>
+<div id="in-rtri" class="inputs" style="display:none">
+  <div class="field"><div class="label">Ширина прямоуг. (см)</div><input type="number" id="rtw" value="20" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота прямоуг. (см)</div><input type="number" id="rth" value="30" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Штук треугольников</div><input type="number" id="rtn" value="7" min="1"></div>
+  <div class="sub">Прямоугольник режется по диагонали → 2 треугольника, обрезков нет.</div>
+</div>
+<div id="in-itri" class="inputs" style="display:none">
+  <div class="field"><div class="label">Основание (см)</div><input type="number" id="itb" value="20" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота (см)</div><input type="number" id="ith" value="30" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Штук треугольников</div><input type="number" id="itn" value="8" min="1"></div>
+  <div class="sub">Зигзаг △▽△▽ — обрезки только по краям рулона.</div>
+</div>
+<div id="in-trap" class="inputs" style="display:none">
+  <div class="field"><div class="label">Длинное осн. a (см)</div><input type="number" id="ta" value="30" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Короткое осн. b (см)</div><input type="number" id="tc" value="20" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Высота (см)</div><input type="number" id="tth" value="15" min="1" step="0.5"></div>
+  <div class="field"><div class="label">Штук</div><input type="number" id="trn" value="5" min="1"></div>
+  <div class="sub">Чередование нормальная/перевёрнутая.</div>
+</div>
+
+<button class="add" onclick="addPart()">+ Добавить деталь в список</button>
+
+<div id="parts-list">
+  <div class="empty-hint">Список деталей пуст — добавьте хотя бы одну</div>
+</div>
+
+<div class="sep"></div>
+<button class="go" id="calc-btn" onclick="calc()" disabled>Рассчитать раскрой →</button>
+
+<div id="cvwrap"><svg id="sv"></svg></div>
+<div id="stats" style="display:none">
+  <div class="stats">
+    <div class="stat"><div class="sl">Длина рулона</div><div class="sv" id="slen"></div></div>
+    <div class="stat"><div class="sl">Использовано</div><div class="sv" id="suse"></div></div>
+    <div class="stat"><div class="sl">Обрезки</div><div class="sv" id="swaste"></div></div>
+    <div class="stat"><div class="sl">Деталей всего</div><div class="sv" id="scnt"></div></div>
+  </div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.MainButton.setText('Рассчитать раскрой');
+  tg.MainButton.onClick(calc);
+}
+
+let S='rect';
+let parts=[];
+const COLORS=['#4a90d9','#e06c4a','#5cb85c','#a464d9','#e0a040','#4ab8b8','#d94a82'];
+
+function setS(s){
+  S=s;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['rect','rtri','itri','trap'][i]===s));
+  ['rect','rtri','itri','trap'].forEach(x=>document.getElementById('in-'+x).style.display=x===s?'flex':'none');
+}
+function g(id){return +document.getElementById(id).value;}
+
+function shapeLabel(type,p){
+  if(type==='rect') return `Прямоугольник ${p.w}×${p.h} см × ${p.n} шт`;
+  if(type==='rtri') return `Прям. треугольник ${p.w}×${p.h} см × ${p.n} шт`;
+  if(type==='itri') return `Равнобедр. треугольник ос.${p.base} в.${p.h} см × ${p.n} шт`;
+  if(type==='trap') return `Трапеция a=${p.a} b=${p.b} в.${p.h} см × ${p.n} шт`;
+}
+
+function addPart(){
+  const rollW=g('rollw');
+  let params;
+  if(S==='rect'){
+    params={w:g('rw'),h:g('rh'),n:g('rn')};
+    if(params.w>rollW){alert('Деталь шире рулона!');return;}
+  } else if(S==='rtri'){
+    params={w:g('rtw'),h:g('rth'),n:g('rtn')};
+    if(params.w>rollW){alert('Деталь шире рулона!');return;}
+  } else if(S==='itri'){
+    params={base:g('itb'),h:g('ith'),n:g('itn')};
+    if(params.base>rollW){alert('Деталь шире рулона!');return;}
+  } else if(S==='trap'){
+    params={a:g('ta'),b:g('tc'),h:g('tth'),n:g('trn')};
+    if(params.a>rollW){alert('Деталь шире рулона!');return;}
+  }
+  parts.push({type:S,params});
+  renderList();
+}
+
+function removePart(idx){
+  parts.splice(idx,1);
+  renderList();
+}
+
+function renderList(){
+  const el=document.getElementById('parts-list');
+  el.innerHTML='';
+  if(parts.length===0){
+    el.innerHTML='<div class="empty-hint">Список деталей пуст — добавьте хотя бы одну</div>';
+  }
+  parts.forEach((p,i)=>{
+    const item=document.createElement('div');
+    item.className='part-item';
+    item.innerHTML=`<div class="part-dot" style="background:${COLORS[i%COLORS.length]}"></div>`+
+      `<div class="part-label">${shapeLabel(p.type,p.params)}</div>`+
+      `<button class="part-del" onclick="removePart(${i})">×</button>`;
+    el.appendChild(item);
+  });
+  const empty=parts.length===0;
+  document.getElementById('calc-btn').disabled=empty;
+  if(tg){empty?tg.MainButton.hide():tg.MainButton.show();}
+}
+
+function calcGroup(type,params,rollW){
+  let pls=[],height=0,usedArea=0;
+  const n=params.n;
+  if(type==='rect'){
+    const{w,h}=params;
+    const cols=Math.floor(rollW/w),rows=Math.ceil(n/cols);
+    height=rows*h; usedArea=w*h*n;
+    for(let i=0;i<n;i++){const c=i%cols,r=Math.floor(i/cols);pls.push({t:'rect',x:c*w,y:r*h,w,h});}
+  } else if(type==='rtri'){
+    const{w,h}=params;
+    const pairs=Math.ceil(n/2),cols=Math.floor(rollW/w),rows=Math.ceil(pairs/cols);
+    height=rows*h; usedArea=w*h/2*n;
+    let placed=0;
+    for(let i=0;i<pairs;i++){
+      const c=i%cols,r=Math.floor(i/cols);
+      pls.push({t:'rtri',x:c*w,y:r*h,w,h,which:0}); placed++;
+      if(placed<n){pls.push({t:'rtri',x:c*w,y:r*h,w,h,which:1}); placed++;}
+      pls.push({t:'line',x1:c*w,y1:r*h,x2:(c+1)*w,y2:(r+1)*h});
+    }
+  } else if(type==='itri'){
+    const{base,h}=params;
+    const step=base/2,perRow=Math.max(1,Math.floor(rollW/step)-1),rows=Math.ceil(n/perRow);
+    height=rows*h; usedArea=base*h/2*n;
+    let placed=0;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<perRow&&placed<n;c++){pls.push({t:'itri',x:c*step,y:r*h,base,h,up:c%2===0});placed++;}
+    }
+  } else if(type==='trap'){
+    const{a,b,h}=params;
+    const step=(a+b)/2,perRow=Math.max(1,Math.floor((rollW-a)/step)+1),rows=Math.ceil(n/perRow);
+    height=rows*h; usedArea=(a+b)*h/2*n;
+    let placed=0;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<perRow&&placed<n;c++){
+        pls.push({t:'trap',x:c*step,y:r*h,a,b,h,flip:c%2===1}); placed++;
+      }
+    }
+  }
+  return{pls,height,usedArea,n};
+}
+
+function calc(){
+  const rollW=g('rollw');
+  let allPls=[],totalH=0,totalUsed=0,totalN=0;
+  parts.forEach((part,idx)=>{
+    const{pls,height,usedArea,n}=calcGroup(part.type,part.params,rollW);
+    const color=COLORS[idx%COLORS.length];
+    pls.forEach(p=>{
+      if(p.t==='line'){p.y1+=totalH;p.y2+=totalH;}
+      else{p.y+=totalH;}
+      p.color=color;
+    });
+    allPls.push(...pls);
+    totalH+=height;
+    totalUsed+=usedArea;
+    totalN+=n;
+    if(idx<parts.length-1){allPls.push({t:'sep',y:totalH});}
+  });
+  render(allPls,rollW,totalH,totalUsed,totalN);
+  // Прокрутить к результату
+  setTimeout(()=>document.getElementById('cvwrap').scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function render(pls,rollW,totalH,totalUsed,totalN){
+  const ns='http://www.w3.org/2000/svg';
+  const waste=Math.max(0,Math.round((1-totalUsed/(rollW*totalH))*100));
+  document.getElementById('slen').textContent=totalH.toFixed(1)+' см';
+  document.getElementById('suse').textContent=(100-waste)+'%';
+  document.getElementById('swaste').textContent=waste+'%';
+  document.getElementById('scnt').textContent=totalN+' шт';
+
+  const maxW=Math.min(window.innerWidth-56,660);
+  const sc=Math.min(maxW/rollW,4);
+  const sw=Math.round(rollW*sc),sh=Math.round(totalH*sc);
+  const svg=document.getElementById('sv');
+  svg.innerHTML='';
+  svg.setAttribute('width',sw);svg.setAttribute('height',sh);svg.setAttribute('viewBox',`0 0 ${sw} ${sh}`);
+  const bg=document.createElementNS(ns,'rect');
+  bg.setAttribute('width',sw);bg.setAttribute('height',sh);bg.setAttribute('fill','#2a2a2a');
+  svg.appendChild(bg);
+
+  pls.forEach(p=>{
+    if(p.t==='sep'){
+      const line=document.createElementNS(ns,'line');
+      line.setAttribute('x1',0);line.setAttribute('y1',Math.round(p.y*sc)+0.5);
+      line.setAttribute('x2',sw);line.setAttribute('y2',Math.round(p.y*sc)+0.5);
+      line.setAttribute('stroke','#555');line.setAttribute('stroke-width','1');
+      line.setAttribute('stroke-dasharray','8,5');
+      svg.appendChild(line);
+      return;
+    }
+    if(p.t==='line'){
+      const line=document.createElementNS(ns,'line');
+      line.setAttribute('x1',p.x1*sc);line.setAttribute('y1',p.y1*sc);
+      line.setAttribute('x2',p.x2*sc);line.setAttribute('y2',p.y2*sc);
+      line.setAttribute('stroke','#fff');line.setAttribute('stroke-width','0.8');
+      line.setAttribute('stroke-dasharray','4,3');
+      svg.appendChild(line);
+      return;
+    }
+    const el=document.createElementNS(ns,'polygon');
+    const s=sc;
+    let pts='';
+    if(p.t==='rect'){
+      pts=`${p.x*s},${p.y*s} ${(p.x+p.w)*s},${p.y*s} ${(p.x+p.w)*s},${(p.y+p.h)*s} ${p.x*s},${(p.y+p.h)*s}`;
+    } else if(p.t==='rtri'){
+      const x1=p.x*s,y1=p.y*s,x2=(p.x+p.w)*s,y2=(p.y+p.h)*s;
+      pts=p.which===0?`${x1},${y1} ${x1},${y2} ${x2},${y2}`:`${x1},${y1} ${x2},${y1} ${x2},${y2}`;
+    } else if(p.t==='itri'){
+      const lx=p.x*s,rx=(p.x+p.base)*s,mx=(p.x+p.base/2)*s,ty=p.y*s,by=(p.y+p.h)*s;
+      pts=p.up?`${mx},${ty} ${lx},${by} ${rx},${by}`:`${lx},${ty} ${rx},${ty} ${mx},${by}`;
+    } else if(p.t==='trap'){
+      const{x,y,a,b,h,flip}=p,off=(a-b)/2;
+      if(!flip){pts=`${x*s},${(y+h)*s} ${(x+a)*s},${(y+h)*s} ${(x+a-off)*s},${y*s} ${(x+off)*s},${y*s}`;}
+      else{pts=`${x*s},${y*s} ${(x+a)*s},${y*s} ${(x+a-off)*s},${(y+h)*s} ${(x+off)*s},${(y+h)*s}`;}
+    }
+    el.setAttribute('points',pts);
+    el.setAttribute('fill',p.color);
+    el.setAttribute('stroke','#111');
+    el.setAttribute('stroke-width','1');
+    svg.appendChild(el);
+  });
+
+  const legend=document.getElementById('legend');
+  legend.innerHTML='';
+  parts.forEach((p,i)=>{
+    const item=document.createElement('div');
+    item.className='leg-item';
+    item.innerHTML=`<div class="leg-dot" style="background:${COLORS[i%COLORS.length]}"></div><span>${shapeLabel(p.type,p.params)}</span>`;
+    legend.appendChild(item);
+  });
+
+  document.getElementById('cvwrap').style.display='block';
+  document.getElementById('stats').style.display='block';
+}
+</script>
+</body>
+</html>
